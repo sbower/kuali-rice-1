@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+       xmlns:p="http://www.springframework.org/schema/p" 
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:beans="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:jee="http://www.springframework.org/schema/jee"
+       xmlns:jms="http://www.springframework.org/schema/jms"
+       xmlns:lang="http://www.springframework.org/schema/lang"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:oxm="http://www.springframework.org/schema/oxm"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/aop
+                           http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+                           http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+                           http://www.springframework.org/schema/context
+                           http://www.springframework.org/schema/context/spring-context-3.0.xsd
+                           http://www.springframework.org/schema/jdbc
+                           http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd
+                           http://www.springframework.org/schema/jee
+                           http://www.springframework.org/schema/jee/spring-jee-3.0.xsd
+                           http://www.springframework.org/schema/jms
+                           http://www.springframework.org/schema/jms/spring-jms-3.0.xsd
+                           http://www.springframework.org/schema/lang
+                           http://www.springframework.org/schema/lang/spring-lang-3.0.xsd
+                           http://www.springframework.org/schema/mvc
+                           http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+                           http://www.springframework.org/schema/oxm
+                           http://www.springframework.org/schema/oxm/spring-oxm-3.0.xsd
+                           http://www.springframework.org/schema/task
+                           http://www.springframework.org/schema/task/spring-task-3.0.xsd
+                           http://www.springframework.org/schema/tx
+                           http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+                           http://www.springframework.org/schema/util
+                           http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+
+	<import resource="classpath:org/kuali/rice/core/CommonSpringBeans.xml"/>
+    <import resource="classpath:org/kuali/rice/core/config/CoreOjbSpringBeans.xml" />
+
+	<bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
+		<property name="interceptorNames">
+			<list>
+				<idref bean="matchAllTxInterceptor" />
+			</list>
+		</property>
+		<property name="beanNames">
+			<list>
+                <idref local="xmlDigesterService" />
+                <!-- <idref local="styleService" />
+                <idref local="styleXmlLoader" />
+                <idref local="styleXmlExporter" />
+                -->
+			</list>
+		</property>
+	</bean>
+
+    <bean id="platformAwareDao" abstract="true" class="org.kuali.rice.core.framework.persistence.ojb.dao.PlatformAwareDaoBaseOjb">
+		<property name="jcdAlias" value="coreApplicationDataSource" />
+		<property name="dbPlatform" ref="dbPlatform" />
+	</bean>
+
+    <!-- this should go in the core spring beans once ojb is available-->
+    <bean id="criteriaLookupService" class="org.kuali.rice.core.impl.criteria.CriteriaLookupServiceOjbImpl" parent="platformAwareDao"/>
+
+	<!-- Mail Sender Factory -->
+	<bean id="mailSender" class="org.kuali.rice.core.mail.MailSenderFactoryBean" />
+
+	<!-- Mailer -->
+	<bean id="mailer" class="org.kuali.rice.core.mail.Mailer">
+	   <property name="mailSender" ref="mailSender" />
+	</bean>
+	
+	<bean id="dateTimeService" class="org.kuali.rice.core.impl.datetime.DateTimeServiceImpl"/>
+
+	<bean id="xmlImpexRegistry" class="org.kuali.rice.core.impl.impex.xml.XmlImpexRegistryImpl" />
+
+	<bean id="xmlIngesterService" class="org.kuali.rice.core.impl.impex.xml.XmlIngesterServiceImpl">
+        <property name="xmlDigesterService" ref="xmlDigesterService" />
+        <property name="validate">
+            <value>true</value>
+        </property>
+        <property name="xmlImpexRegistry" ref="xmlImpexRegistry" />
+     </bean>
+
+    <bean id="xmlDigesterService" class="org.kuali.rice.core.impl.impex.xml.XmlDigesterServiceImpl"/>
+
+	<bean id="xmlExporterService" class="org.kuali.rice.core.impl.impex.xml.XmlExporterServiceImpl">
+		<property name="xmlImpexRegistry" ref="xmlImpexRegistry" />
+	</bean>
+	
+	<!-- TODO moved these to KEWSpringBeans.xml for now because of dependency issues with the caching magic
+	
+	<bean id="serviceRegistry" class="org.kuali.rice.krad.config.GlobalResourceLoaderServiceFactoryBean">
+		<property name="serviceName" value="rice.ksb.serviceBus" />
+	</bean>
+    
+    <bean id="styleService" class="org.kuali.rice.core.impl.style.StyleServiceImpl">
+    </bean>
+    
+    <bean id="styleXmlLoader" class="org.kuali.rice.core.impl.style.StyleXmlParser">
+    	<property name="styleService" ref="styleService" />
+    </bean>
+    
+    <bean id="styleXmlExporter" class="org.kuali.rice.core.impl.style.StyleXmlExporter"/>
+        
+    <bean id="coreImpexRegistrations" class="org.kuali.rice.core.framework.impex.xml.XmlImpexRegistrationBean">
+		<property name="xmlImpexRegistry" ref="xmlImpexRegistry" />
+        
+        <property name="xmlLoadersToRegister">
+		   <list>
+		     <ref local="styleXmlLoader" />
+		   </list>
+		</property>
+		<property name="xmlExportersToRegister">
+		   <list>
+		     <ref local="styleXmlExporter" />
+		   </list>
+		</property>
+	</bean>
+	
+	-->
+
+</beans>

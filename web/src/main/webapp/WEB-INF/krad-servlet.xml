@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+                        http://www.springframework.org/schema/context
+                        http://www.springframework.org/schema/context/spring-context-3.0.xsd
+                        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
+
+  <context:component-scan base-package="org.kuali.rice.krad" />
+  <context:component-scan base-package="edu.sampleu.travel.krad" />
+  <context:component-scan base-package="edu.sampleu.kew.krad" />
+  <context:component-scan base-package="edu.sampleu.student.web.controller" />
+  <context:component-scan base-package="org.kuali.rice.krms" />
+  <context:component-scan base-package="org.kuali.rice.core.web" />
+
+  <bean id="viewResolver" class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+    <property name="viewClass" value="org.springframework.web.servlet.view.JstlView" />
+    <property name="prefix" value="/krad/WEB-INF/jsp/" />
+    <property name="suffix" value=".jsp" />
+  </bean>
+  
+  <bean id="handlerMapping" class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
+    <property name="interceptors">
+      <ref bean="uifControllerHandlerInterceptor"/>
+    </property>
+  </bean>
+
+  <bean id="uifControllerHandlerInterceptor" class="org.kuali.rice.krad.web.controller.UifControllerHandlerInterceptor" />
+  
+  <bean id="exceptionResolver" class="org.kuali.rice.krad.web.bind.UifHandlerExceptionResolver"/>
+  
+  <bean class="org.kuali.rice.krad.web.controller.UifAnnotationMethodHandleAdapter">
+    <property name="webBindingInitializer">
+      <ref bean="kradConfigurableWebBindingInitializer"/>
+    </property>
+    <property name="messageConverters">
+        <list>
+            <bean class="org.springframework.http.converter.ByteArrayHttpMessageConverter" />
+            <bean class="org.springframework.http.converter.ResourceHttpMessageConverter" />
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter" />
+            <bean class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter" />
+            <bean class="org.springframework.http.converter.xml.SourceHttpMessageConverter" />
+            <bean class="org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter" />
+        </list>
+    </property>
+  </bean>
+
+  <bean id="kradConfigurableWebBindingInitializer" class="org.kuali.rice.krad.web.bind.UifConfigurableWebBindingInitializer"/>
+
+  <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+    <property name="maxUploadSize" value="500000"/>
+  </bean>
+
+  <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+    <property name="basenames">
+      <list>
+        <value>org/kuali/rice/krad/ApplicationResources</value>
+        <value>org/kuali/rice/krad/KRAD-ApplicationResources</value>
+      </list>
+    </property>
+  </bean>
+  
+</beans>

@@ -1,0 +1,14 @@
+<!--
+  This file stores default configuration for the EDLConfigurer.
+ -->
+<config>
+
+  <param name="rice.resourceloader.servicesToCache">
+      enEDocLiteService
+  </param>
+
+  <param name="edl.config.loc">classpath:META-INF/EDLConfig.xml</param>
+  <param name="edl.style.widgets">classpath:org/kuali/rice/edl/impl/default-widgets.xml</param>
+  <param name="edl.mode">LOCAL</param>
+    
+</config>

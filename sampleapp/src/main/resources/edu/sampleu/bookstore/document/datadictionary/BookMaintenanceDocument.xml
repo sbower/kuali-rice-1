@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:p="http://www.springframework.org/schema/p"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans         http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+  <bean id="BookMaintenanceDocument-workflowProperties-parentBean" abstract="true" parent="WorkflowProperties">
+    <property name="workflowPropertyGroups">
+      <list>
+        <bean parent="WorkflowPropertyGroup">
+          <property name="workflowProperties">
+            <list>
+              <bean parent="WorkflowProperty" p:path="oldMaintainableObject.businessObject"/>
+              <bean parent="WorkflowProperty" p:path="newMaintainableObject.businessObject"/>
+            </list>
+          </property>
+        </bean>
+      </list>
+    </property>
+  </bean>
+  <bean id="Book-MaintenanceView" parent="MaintenanceView">
+    <property name="dataObjectClassName" value="edu.sampleu.bookstore.bo.Book"/>
+    <property name="items">
+      <list merge="true">
+        <bean parent="MaintenanceGroupSectionGridLayout">
+          <property name="title" value="Add/Edit Book"/>
+          <property name="items">
+            <list>
+              <bean parent="AttributeField" p:propertyName="title"/>
+              <bean parent="AttributeField" p:propertyName="typeCode"/>
+              <bean parent="AttributeField" p:propertyName="isbn"/>
+              <bean parent="AttributeField" p:propertyName="price"/>
+              <bean parent="AttributeField" p:propertyName="rating"/>
+            </list>
+          </property>
+        </bean>
+        <bean parent="MaintenanceGroupSectionGridLayout">
+          <property name="title" value="Publishing Information"/>
+          <property name="items">
+            <list>
+              <bean parent="AttributeField" p:propertyName="publisher"/>
+              <bean parent="AttributeField" p:propertyName="publicationDate"/>
+            </list>
+          </property>
+        </bean>
+        <bean parent="MaintenanceCollectionGroupSection">
+          <property name="title" value="Authors"/>
+          <property name="collectionObjectClass" value="edu.sampleu.bookstore.bo.Author"/>
+          <property name="propertyName" value="authors"/>
+          <property name="items">
+            <list>
+              <bean parent="AttributeField" p:propertyName="authorName"/>
+              <bean parent="AttributeField" p:propertyName="email"/>
+              <bean parent="AttributeField" p:propertyName="phoneNbr"/>
+              <bean parent="AttributeField" p:propertyName="active"/>
+              <bean parent="AttributeField" p:propertyName="extension.accountNumber"/>
+              <bean parent="AttributeField" p:propertyName="extension.bankName"/>
+            </list>
+          </property>
+          <property name="layoutManager.summaryTitle" value="Author"/>
+          <property name="layoutManager.summaryFields">
+            <list>
+              <value>authorId</value>
+            </list>
+          </property>
+        </bean>
+      </list>
+    </property>
+  </bean>
+  <bean id="BookMaintenanceDocument" parent="uifMaintenanceDocumentEntry">
+    <property name="dataObjectClass" value="edu.sampleu.bookstore.bo.Book"/>
+    <property name="maintainableClass" value="edu.sampleu.bookstore.maintenance.BookMaintainable"/>
+    <property name="documentTypeName" value="BookMaintenanceDocument"/>
+    <property name="documentAuthorizerClass" value="org.kuali.rice.krad.document.authorization.MaintenanceDocumentAuthorizerBase"/>
+    <property name="lockingKeys">
+      <list>
+        <value>id</value>
+      </list>
+    </property>
+  </bean>
+</beans>

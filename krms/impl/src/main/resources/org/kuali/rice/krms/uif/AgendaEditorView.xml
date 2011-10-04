@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans         
+                           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+                           http://www.springframework.org/schema/util 
+                           http://www.springframework.org/schema/util/spring-util-3.0.xsd">       
+  <!--
+   Copyright 2007-2009 The Kuali Foundation
+
+   Licensed under the Educational Community License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+   http://www.opensource.org/licenses/ecl2.php
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+  -->
+
+
+  <bean id="AgendaEditorMaintenanceDocument" parent="uifMaintenanceDocumentEntry">
+    <property name="dataObjectClass" value="org.kuali.rice.krms.impl.ui.AgendaEditor"/>
+    <property name="maintainableClass" value="org.kuali.rice.krms.impl.ui.AgendaEditorMaintainable"/>
+    <property name="documentTypeName" value="AgendaEditorMaintenanceDocument"/>
+    <property name="documentAuthorizerClass" value="org.kuali.rice.krms.impl.authorization.AgendaEditorAuthorizer"/>
+    <property name="businessRulesClass" value="org.kuali.rice.krms.impl.rule.AgendaEditorBusRule" />
+    <property name="lockingKeys">
+      <list>
+        <value>agenda.id</value>
+      </list>
+    </property>
+  </bean>
+  
+  <util:list id="buttonClasses">
+    <value>ui-button</value>
+    <value>ui-widget</value>
+  </util:list>
+
+  <!-- hack to merge a list with one of those util:lists -->
+  <bean id="krms-css" class="org.apache.commons.collections.ListUtils" factory-method="union">
+      <constructor-arg>
+          <ref bean="kns-css" />
+      </constructor-arg> 
+      <constructor-arg><list><value>/krms/css/agendaTree.css</value></list></constructor-arg>
+  </bean>
+
+  <bean id="AgendaTreeWidget" parent="TreeWidget">
+    <property name="template" value="/krad/WEB-INF/jsp/templates/widget/agendaTree.jsp"/>
+  </bean>
+
+  <bean id="Editor-MaintenanceView" parent="MaintenanceView" p:refreshWhenChanged="document.newMaintainableObject.agenda.name" p:additionalScriptFiles="/krms/scripts/ruleTree.js,../krms/scripts/agendaTree.js">
+    <property name="additionalCssFiles" ref="krms-css" />
+    <property name="title" value="Agenda Editor"/>
+    <property name="dataObjectClassName" value="org.kuali.rice.krms.impl.ui.AgendaEditor"/>
+    <property name="viewHelperServiceClassName" value="org.kuali.rice.krms.impl.ui.AgendaEditorMaintainable"/>
+    <property name="items">
+      <list> 
+        <ref bean="AgendaEditorView-Agenda-Page"/>
+        <!-- ref bean="AgendaEditorView-AddRule-Page"/ -->
+        <ref bean="AgendaEditorView-EditRule-Page"/>
+      </list>
+    </property>
+    <property name="singlePageView" value="false"/>
+    <property name="entryPageId" value="AgendaEditorView-Agenda-Page"/>
+    <!-- Since we want different footers for each page we override the footer section with an empty footer -->
+    <property name="footer">
+      <bean parent="Footer" />
+    </property>
+  </bean>
+
+  <bean id="AgendaEditorView-Agenda-Page" parent="AgendaEditorView-Agenda-Page-Parent"/>
+  <bean id="AgendaEditorView-Agenda-Page-Parent" parent="Page">
+    <property name="items">
+      <list>
+        <ref bean="AgendaEditorView-AgendaSection" />
+      </list>
+    </property>
+    <property name="footer">
+      <bean parent="FooterDocument" />
+    </property>
+  </bean>
+
+  <bean id="AgendaEditorView-AddRule-Page" parent="AgendaEditorView-AddRule-Page-Parent"/>
+  <bean id="AgendaEditorView-AddRule-Page-Parent" parent="Page">
+    <property name="items">
+      <list>
+        <bean parent="ruleEditorBody">
+        </bean>
+      </list>
+    </property>
+    <property name="footer">
+      <bean parent="Footer">
+        <property name="items">
+          <list>
+            <bean parent="NavigationActionField" p:methodToCall="addRule" p:actionLabel="Add Rule"/>
+            <bean parent="NavigationActionField" p:navigateToPageId="AgendaEditorView-Agenda-Page" p:actionLabel="Cancel"/>
+          </list>
+        </property>
+      </bean>
+   </property>
+  </bean>
+
+  <bean id="AgendaEditorView-EditRule-Page" parent="AgendaEditorView-EditRule-Page-Parent"/>
+  <bean id="AgendaEditorView-EditRule-Page-Parent" parent="Page">
+    <property name="items">
+      <list>
+        <bean parent="ruleEditorBody">
+        </bean>
+      </list>
+    </property>
+    <property name="footer">
+      <bean parent="Footer">
+        <property name="items">
+          <list>
+            <bean parent="NavigationActionField" p:methodToCall="editRule" p:actionLabel="Update Rule"/>
+            <bean parent="NavigationActionField" p:navigateToPageId="AgendaEditorView-Agenda-Page" p:actionLabel="Cancel"/>
+          </list>
+        </property>
+      </bean>
+   </property>
+  </bean>
+
+  <bean id="AgendaEditorView-AgendaSection" parent="GroupSection">
+    <property name="title" value="Agenda Editor" />
+    <property name="items">
+      <list>
+        <bean parent="GroupGridBodyOnly" p:layoutManager.numberOfColumns="2">
+          <property name="items">
+            <list>
+              <bean parent="AttributeField" p:propertyName="agenda.name" p:label="Name" p:required="true">
+                <property name="control">
+                  <bean parent="TextControl" p:size="30" p:watermarkText="agenda name"/>
+                </property>
+              </bean>
+              <bean parent="AttributeField" p:propertyName="agenda.contextId" p:label="Context" p:required="true">
+                <property name="control">
+                  <bean parent="TextControl" p:size="30" p:watermarkText="agenda context"/>
+                </property>
+
+                <property name="fieldLookup.dataObjectClassName" value="org.kuali.rice.krms.impl.repository.ContextBo"/>
+                <property name="fieldLookup.fieldConversions">
+                  <map>
+                    <entry key="id" value="agenda.contextId"/>
+                  </map>
+                </property>
+
+                <property name="fieldSuggest.render" value="true" />
+                <property name="fieldSuggest.sourcePropertyName" value="name" />
+                <property name="fieldSuggest.suggestQuery.dataObjectClassName" value="org.kuali.rice.krms.impl.repository.ContextBo"/>
+<!--                <property name="fieldAttributeQuery">
+                    <bean parent="FieldAttributeQuery" p:dataObjectClassName="org.kuali.rice.krms.impl.repository.ContextBo"
+                        p:queryFieldMapping="name:name" p:returnFieldMapping="name:name,namespace:namespace,id:id"/>
+                </property> -->
+              </bean>
+              <bean parent="AttributeField" p:propertyName="agenda.active" p:label="Active">
+                <property name="control">
+                  <bean parent="CheckboxControl"/>
+                </property>
+              </bean>
+            </list>
+          </property>
+        </bean>
+
+        <bean parent="GroupBodyOnly" p:style="border: 1px solid #999999; padding: 5px; margin: 5px; background: white; " >
+          <property name="items">
+            <list>
+              <bean parent="GroupGridBodyOnly" p:style="margin-bottom: 5pt;">
+                <property name="items">
+                  <list>
+                    <ref bean="AgendaEditorView-TreeControls" />
+                  </list>
+                </property>
+              </bean>
+              <ref bean="AgendaEditorView-TreeExpandCollapse" />
+              <ref bean="AgendaEditorView-Tree" />
+            </list>
+          </property>
+        </bean>
+      </list>
+    </property>
+  </bean>
+
+  <bean id="AgendaEditorView-TreeExpandCollapse" parent="FieldGroup" p:showLabel="false"
+    p:style="font-size: smaller;">
+    <property name="render" value="@{document.newMaintainableObject.dataObject.agenda != null and document.newMaintainableObject.dataObject.agenda.name != null and !document.newMaintainableObject.dataObject.agenda.name.isEmpty()}" />
+    <property name="group.layoutManager.orientation" value="HORIZONTAL"/>
+    <property name="items">
+      <list>                            
+        <bean parent="ActionLinkField" p:clientSideJs="jq('.jstree').jstree('open_all');" 
+          p:actionLabel="[+] expand all" p:style="font-size: smaller; margin-left: 2em;">
+          <property name="actionImage"><null/></property>
+        </bean>
+        <bean parent="ActionLinkField" p:clientSideJs="jq('.jstree').jstree('close_all');" 
+          p:actionLabel="[-] collapse all" p:style="font-size: smaller; margin-right: 15pt;">
+          <property name="actionImage"><null/></property>
+        </bean>
+        <bean id="agenda_item_selected" parent="AttributeField" p:propertyName="selectedAgendaItemId" p:showLabel="false">
+          <property name="control">
+            <bean parent="HiddenControl"/>
+          </property>
+        </bean>
+      </list>
+    </property>
+  </bean>
+
+  <bean id="AgendaEditorView-TreeControls" parent="FieldGroup" p:showLabel="false" p:group.layoutManager.orientation="HORIZONTAL">
+    <property name="items">
+      <list>
+        <bean parent="NavigationActionField" p:methodToCall="goToAddRule" p:actionLabel="Add Rule"
+          p:styleClasses-ref="buttonClasses" p:style="margin-right: 15pt;"/>
+        <bean parent="NavigationActionField" p:methodToCall="goToEditRule" p:actionLabel="Edit Rule"
+          p:styleClasses-ref="buttonClasses" p:style="margin-right: 15pt;"/>
+
+        <!--
+        <bean parent="AttributeField_Form" p:propertyName="maintenanceAction" p:label="" 
+           p:defaultValue="below" p:style="float:none; margin-right: 15px;">
+          <property name="control">
+            <bean parent="SelectControl">
+                <property name="options">
+                    <list>
+                        <bean class="org.kuali.rice.core.api.util.ConcreteKeyValue" p:key="below" p:value="below selected"/>
+                        <bean class="org.kuali.rice.core.api.util.ConcreteKeyValue" p:key="above" p:value="above selected"/>
+                        <bean class="org.kuali.rice.core.api.util.ConcreteKeyValue" p:key="inWhenTrue" p:value="in selected's 'When TRUE'"/>
+                        <bean class="org.kuali.rice.core.api.util.ConcreteKeyValue" p:key="inWhenFalse" p:value="in selected's 'When FALSE'"/>
+                    </list>
+                </property>
+            </bean>
+          </property>
+        </bean>
+         -->
+         
+        <bean parent="MessageField" p:messageText="Move: [" p:style="display: inline;"/>
+
+        <bean parent="ActionField" p:clientSideJs="ajaxCall('ajaxMoveLeft', 'AgendaEditorView-Tree');"
+              p:actionLabel="&lt; Left" p:styleClasses-ref="buttonClasses" />
+<!--
+        <bean parent="ActionField" p:methodToCall="moveLeft"
+          p:actionLabel="&lt; Left" p:styleClasses-ref="buttonClasses" />
+-->
+        <bean parent="ActionField" p:clientSideJs="ajaxCall('ajaxMoveRight', 'AgendaEditorView-Tree');"
+          p:actionLabel="Right &gt;" p:styleClasses-ref="buttonClasses"
+          p:style="margin-right: 15pt;"/> <!-- Horiz whitespace -->
+
+        <bean parent="ActionField" p:clientSideJs="ajaxCall('ajaxMoveUp', 'AgendaEditorView-Tree');" p:actionLabel="Up ^"
+          p:styleClasses-ref="buttonClasses" />
+
+        <bean parent="ActionField" p:clientSideJs="ajaxCall('ajaxMoveDown', 'AgendaEditorView-Tree');"
+          p:actionLabel="v Down" p:styleClasses-ref="buttonClasses" />
+
+        <bean parent="MessageField" p:messageText="]" p:style="display: inline;"/>
+        
+        <bean parent="ActionField" p:clientSideJs="ajaxCall('ajaxCut', 'AgendaEditorView-Tree');" p:actionLabel="Cut" p:styleClasses-ref="buttonClasses"
+              p:style="margin-left: 15pt;"/> <!-- Horiz whitespace -->
+
+        <!-- Add a conditional disable once KRAD supports this.  Disable if cut buffer is empty, something like this:
+            p:conditionalDisable="document.newMaintainableObject.dataObject.agendaItemCutPaste == null -->
+        <bean parent="ActionField"  p:clientSideJs="ajaxCall('ajaxPaste', 'AgendaEditorView-Tree');" p:actionLabel="Paste" p:styleClasses-ref="buttonClasses" />
+
+        <bean parent="ActionField" p:clientSideJs="ajaxCall('ajaxDelete', 'AgendaEditorView-Tree');" p:actionLabel="Delete" p:styleClasses-ref="buttonClasses"
+              p:style="margin-right: 15pt;" /> <!-- Horiz whitespace -->
+
+        <bean parent="ActionField" p:methodToCall="refresh" p:actionLabel="refresh" p:styleClasses-ref="buttonClasses"/>
+      </list>
+    </property> 
+  </bean>
+
+  <bean id="AgendaEditorView-Tree" parent="TreeGroup" p:accordion.render="false" p:header.render="false" p:style="float:left; margin-left: 2em;">
+    <property name="title" value="Agenda Items"/>
+    <property name="propertyName" value="agendaRuleTree"/>
+    <property name="treeWidget">
+      <bean parent="AgendaTreeWidget">
+        <property name="componentOptions">
+          <map>
+            <entry key="'plugins'"
+              value="['themes','html_data', 'ui', 'crrm', 'dnd']" />
+            <entry key="'themes'"
+              value="{'theme':'default','dots':'false','icons':'false'}" />
+            <entry key="'ui'" value="{ 'select_limit' : 1 }" />
+            <entry key="'dnd'" value="{ 'drag_target' : false, 'drop_target' : false }" />
+            <!-- entry key="'crrm'" value="
+            {
+            'move' : {
+                   /*
+                    * m.o - the node being dragged
+                    * m.r - the target node
+                    */
+                    'check_move' : function (m) { 
+                        var p = this._get_parent(m.o);
+                        if(!p) return false;
+                        p = p == -1 ? this.get_container() : p;
+                        
+                        if (m.o.hasClass('logicNode')) return false;
+                        
+                        if(p === m.np) return true;
+                        if(p[0] &amp;&amp; m.np[0] &amp;&amp; p[0] === m.np[0]) return true;
+                        return false;
+                    }
+                }
+            } 
+              "/ -->
+          </map>
+        </property>
+      </bean>
+    </property>
+    <property name="nodePrototypeMap">
+      <map key-type="java.lang.Class">
+        <entry>
+          <key>
+            <bean class="java.lang.Class" factory-method="forName">
+              <constructor-arg value="org.kuali.rice.krms.impl.ui.AgendaTreeRuleNode"/>
+            </bean>
+          </key> 
+          <bean class="org.kuali.rice.krad.uif.container.NodePrototype">
+            <property name="labelPrototype">
+              <bean parent="MessageField"/>
+            </property>
+            <property name="dataGroupPrototype">
+              <!-- float:right is a hack to get the group for this hidden control out of the way -->
+              <bean parent="GroupBodyOnly" p:hidden="true" p:style="float: right;">
+                <property name="items">
+                  <list>
+                    <bean parent="AttributeField" p:propertyName="agendaItem.id"
+                            p:showLabel="false" p:label="id" p:maxLength="255">
+                      <property name="control">
+                        <bean parent="HiddenControl"/>
+                      </property>
+                    </bean>
+                  </list>
+                </property>
+              </bean>
+            </property>
+          </bean>
+        </entry>
+        <entry>
+          <key>
+            <bean class="java.lang.Class" factory-method="forName">
+              <constructor-arg value="org.kuali.rice.krms.impl.ui.AgendaTreeLogicNode"/>
+            </bean>
+          </key> 
+          <bean class="org.kuali.rice.krad.uif.container.NodePrototype">
+            <property name="labelPrototype">
+              <bean parent="MessageField"/>
+            </property>
+            <property name="dataGroupPrototype">
+              <bean parent="GroupBodyOnly" />
+            </property>
+          </bean>
+        </entry>
+      </map>
+    </property>
+  </bean>
+
+</beans>

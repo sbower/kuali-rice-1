@@ -1,0 +1,48 @@
+package org.kuali.rice.krms.impl.repository
+
+import org.kuali.rice.krad.bo.MutableInactivatable
+import org.kuali.rice.krad.bo.PersistableBusinessObjectBase
+import org.kuali.rice.krms.api.repository.type.KrmsAttributeDefinition
+import org.kuali.rice.krms.api.repository.type.KrmsAttributeDefinitionContract
+
+public class KrmsAttributeDefinitionBo extends PersistableBusinessObjectBase implements KrmsAttributeDefinitionContract, MutableInactivatable{
+
+	def String id
+	def String name
+	def String namespace
+	def String label
+    def String description
+	def boolean active
+	def String componentName
+		
+	/**
+	* Converts a mutable bo to it's immutable counterpart
+	* @param bo the mutable business object
+	* @return the immutable object
+	*/
+   static KrmsAttributeDefinition to(KrmsAttributeDefinitionBo bo) {
+	   if (bo == null) { return null }
+	   return org.kuali.rice.krms.api.repository.type.KrmsAttributeDefinition.Builder.create(bo).build()
+   }
+
+   /**
+	* Converts a immutable object to it's mutable bo counterpart
+	* @param im immutable object
+	* @return the mutable bo
+	*/
+   static KrmsAttributeDefinitionBo from(KrmsAttributeDefinition im) {
+	   if (im == null) { return null }
+
+	   KrmsAttributeDefinitionBo bo = new KrmsAttributeDefinitionBo()
+	   bo.id = im.id
+	   bo.name = im.name
+	   bo.namespace = im.namespace
+	   bo.label = im.label
+       bo.description = im.description
+	   bo.active = im.active
+	   bo.componentName = im.componentName
+	   bo.versionNumber = im.versionNumber
+	   return bo
+   }
+ 
+} 
